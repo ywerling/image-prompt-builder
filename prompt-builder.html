@@ -338,15 +338,29 @@
       return (p && p.value.trim() !== '') ? p.value : match;
     });
 
-    navigator.clipboard.writeText(result).then(() => {
-      const btn = document.getElementById('copy-btn');
+    const btn = document.getElementById('copy-btn');
+
+    const finish = () => {
       btn.textContent = 'Copied!';
       btn.classList.add('copied');
       setTimeout(() => {
         btn.textContent = 'Copy Prompt';
         btn.classList.remove('copied');
       }, 2000);
-    });
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(result).then(finish);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = result;
+      ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      finish();
+    }
   }
 
   function escapeHtml(str) {
